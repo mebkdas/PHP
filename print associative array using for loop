@@ -1,0 +1,25 @@
+<?php
+$data = [
+	["name"=>'Bijoy Kumar Das'],
+	["age"=>23],
+	["gender"=>'Male'],
+	["add"=>'Kolkata']
+];	
+
+$datakeys = array_keys($data);
+$datakeyc = count($datakeys);
+$temp=[];
+
+for($i=0;$i<$datakeyc;$i++){
+	$a = array_keys($data[$i]);
+	$b = $a[0];
+	array_push($temp,$b);
+}
+
+for($i=0;$i<$datakeyc;$i++){
+	for ($j=0; $j <1 ; $j++) {
+		$c = $temp[$i];
+		echo $data[$i][$c]."<br>";
+	}
+}
+?>
