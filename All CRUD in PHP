@@ -1,0 +1,175 @@
+<-----Database Connection File---->
+<?php 
+class DBConnect
+{	private $host = "localhost";
+	private $user ="root";
+	private $pass = "";
+	private $database;
+	private $con="";
+	function __construct($db)
+	{
+		$this->database = $db;
+		$this->con = mysqli_connect($this->host,$this->user,$this->pass,$this->database);
+	}
+	function getConnection(){
+		
+		return $this->con;
+	}
+}
+?>
+
+<-----Action File---->
+<?php 
+include "DbConnection.php";
+interface actionInterface{
+	function createtable($values);
+	function dataInsert($tab,$values);
+	function dataUpdate($tab,$values,$cond);
+	function dataDelete($tab,$id);
+	function getRow($tab,$id);
+	function getAll($tab);
+}
+
+class actionClass implements actionInterface{
+	private $con="";
+	function __construct($dbName){
+		$db = new DBConnect($dbName);
+		$this->con = $db->getConnection();
+	}
+	function createtable($values){
+		$sql = "";
+		if(is_array($values[0])){
+			for ($i=0; $i <count($values); $i++) {
+				$tab = $values[$i][0];
+				$sql = "CREATE TABLE {$tab}(";
+				unset($values[$i][0]); 
+				foreach($values[$i] as $k=>$v){
+					$sql .="{$k} {$v}";
+					$sql .=",";
+				}
+				$sql = substr($sql, 0, -1);
+				$sql .=");"; 
+				$result = $this->con -> query($sql);
+					if ($result) {
+						echo " {$i} Table Created.. ";
+					}else{
+						echo mysqli_error($this->con);
+				}
+				$sql="";
+			}
+		return true;
+		}else{
+		$tab = $values[0];
+		$sql = "CREATE TABLE {$tab}(";
+		unset($values[0]);	
+		foreach($values as $k=>$v){
+			$sql .= "{$k} {$v},";
+		}
+		$sql = substr($sql, 0, -1);
+		$sql .=")";
+		$result = $this->con -> query($sql);
+		if ($result) {
+			echo " 1 Table Created.. ";
+			return true;
+		}else{
+			echo mysqli_error($this->con);
+		}
+	  }
+	}
+
+	function dataInsert($tab,$values){
+		$fieldName = "(".implode(",",array_keys($values)).")";
+		$fieldValue ="('". implode("','",array_values($values))."')";
+		$sql = "INSERT INTO $tab $fieldName VALUES $fieldValue";
+		$result = $this->con -> query($sql);
+		if ($result) {
+			return true;
+		}else{
+			echo mysqli_error($this->con);
+		}
+	}
+
+	function dataUpdate($tab,$values,$cond){
+		$field = "";
+		$conds =" ";
+		foreach ($values as $key => $value) {
+			$field .= $key ."='".$value."',";
+		}
+		$field = substr($field, 0, -1);
+		foreach ($cond as $key => $value) {
+			$conds .= $key . " = '".$value."' AND ";
+		}
+		$conds = substr($conds, 0,-4);
+		$sql = "UPDATE $tab SET $field WHERE $conds";
+		$result = $this->con->query($sql);
+		if ($result) {
+			return true;
+		}
+	}
+	function dataDelete($tab,$id){
+		$sql = "DELETE FROM $tab WHERE id=$id";
+		$result = $this->con->query($sql);
+		if ($result) {
+		return true;
+		}
+	}
+	function getRow($tab,$id){
+		$sql = "SELECT * FROM $tab WHERE id=$id LIMIT 1";
+		$result = $this->con->query($sql);
+		return $row = $result -> fetch_row();
+	}
+	function getAll($tab){
+		$sql = "SELECT * FROM $tab";
+		$result = $this->con->query($sql);
+		while($row = mysqli_fetch_assoc($result)){  
+                $array[] = $row;  
+           }
+        return $array;   
+	}
+}
+
+
+
+
+$obj = new actionClass("shinetable"); //shinetable  -is database name
+
+#Array for create table
+$data =[ 
+	['0'=>"testtable1",'id'=>"INT(20)  PRIMARY KEY",'firstname'=>"VARCHAR(30) NOT NULL",'lastname'=>"VARCHAR(30) NOT NULL",'email'=>"VARCHAR(50)"],
+	['0'=>"testtable2",'id'=>"INT(2)  PRIMARY KEY",'firstname'=>"VARCHAR(30) NOT NULL",'lastname'=>"VARCHAR(30) NOT NULL",'email'=>"VARCHAR(100)"],
+	['0'=>"testtable2",'id'=>"INT(2)  PRIMARY KEY",'firstname'=>"VARCHAR(30) NOT NULL",'lastname'=>"VARCHAR(30) NOT NULL",'email'=>"VARCHAR(100)"]
+];
+/*$data =[ 
+	'0'=>"testtable",'id'=>"INT(2)  PRIMARY KEY",'firstname'=>"VARCHAR(30) NOT NULL",'lastname'=>"VARCHAR(30) NOT NULL",'email'=>"VARCHAR(50)"	
+];*/
+$a=$obj->createtable($data);
+
+
+#Array for department table
+//$data = ['deptname'=>"PHP Developer",'mentorname'=>"R K Sen"];
+#Array for emp table
+//$data = ['name'=>"Suparna Dey",'mobile'=>"7872775310",'address'=>"Kolkata",'email'=>"suparna@gmail.com",'password'=>"Test@123"];
+//$a=$obj->dataInsert("emp",$data);
+
+
+#update
+ //$data = ['deptname'=>"Update Python"];
+ //$cond = ['mentorname'=>'R K Das'];
+ //$a=$obj->dataUpdate("department",$data,$cond);
+
+
+#delete
+//$a=$obj->dataDelete("department",'14');
+
+#getRow
+//$a = $obj->getRow("department",'3');
+#getAllRows
+//$a = $obj->getAll("salary");
+
+
+
+
+echo "<pre>";
+print_r($a);
+echo "</pre>";
+?>
