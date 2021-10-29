@@ -23,6 +23,7 @@ class DBConnect
 include "DbConnection.php";
 interface actionInterface{
 	function createtable($values);
+	function createtab($values);
 	function dataInsert($tab,$values);
 	function dataUpdate($tab,$values,$cond);
 	function dataDelete($tab,$id);
@@ -76,7 +77,24 @@ class actionClass implements actionInterface{
 		}
 	  }
 	}
-
+	function createtab($values){	
+		foreach($values as $key=>$value){
+			    $tab = $key;
+                $sql = "CREATE TABLE {$tab}(";
+                foreach ($value as $key1 => $value1) {
+                $sql .="{$key1} {$value1},";
+            }
+            $sql = substr($sql,0,-1);
+            $sql .=")";
+            $quer=mysqli_query($this->con,$sql);
+            if($quer){
+                echo "Table Created";
+            }
+            else{
+                echo "Table Not created";
+            }
+            }
+	}
 	function dataInsert($tab,$values){
 		$fieldName = "(".implode(",",array_keys($values)).")";
 		$fieldValue ="('". implode("','",array_values($values))."')";
@@ -131,19 +149,26 @@ class actionClass implements actionInterface{
 
 
 
-$obj = new actionClass("shinetable"); //shinetable  -is database name
+$obj = new actionClass("shinetable");
 
 #Array for create table
-$data =[ 
+/*$data =[ 
 	['0'=>"testtable1",'id'=>"INT(20)  PRIMARY KEY",'firstname'=>"VARCHAR(30) NOT NULL",'lastname'=>"VARCHAR(30) NOT NULL",'email'=>"VARCHAR(50)"],
 	['0'=>"testtable2",'id'=>"INT(2)  PRIMARY KEY",'firstname'=>"VARCHAR(30) NOT NULL",'lastname'=>"VARCHAR(30) NOT NULL",'email'=>"VARCHAR(100)"],
 	['0'=>"testtable2",'id'=>"INT(2)  PRIMARY KEY",'firstname'=>"VARCHAR(30) NOT NULL",'lastname'=>"VARCHAR(30) NOT NULL",'email'=>"VARCHAR(100)"]
-];
+];*/
 /*$data =[ 
 	'0'=>"testtable",'id'=>"INT(2)  PRIMARY KEY",'firstname'=>"VARCHAR(30) NOT NULL",'lastname'=>"VARCHAR(30) NOT NULL",'email'=>"VARCHAR(50)"	
 ];*/
-$a=$obj->createtable($data);
+//$a=$obj->createtable($data);
 
+#2nd Way of
+$data=[
+    "Signup"=>["id"=>"int(20) PRIMARY KEY","first_name"=>"varchar(30)","last_name"=>"varchar(30)"],
+    "Login"=>["id"=>"int(20) PRIMARY KEY","email"=>"varchar(30)","password"=>"varchar(30)"],
+    "projects"=>["id"=>"int(20) PRIMARY KEY","project"=>"varchar(30)","Description"=>"varchar(30)"]
+];
+$a=$obj->createtab($data);
 
 #Array for department table
 //$data = ['deptname'=>"PHP Developer",'mentorname'=>"R K Sen"];
